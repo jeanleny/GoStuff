@@ -6,93 +6,57 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-var Stock = business{}
-
-type business struct {
-	stock 	[]Object
-	w		int
-	f		int
-	c		int
-	m		int
-}
-
-func (b *business) Add(o Object) {
-	//o.Buy()
-	b.stock = append(b.stock, o);
-	switch o.(type) {
-		case  Worker :
-			b.w++;
-		case  Factory :
-			b.f++;
-		case  Company :
-			b.c++;
-	}
-}
-
-type Object interface {
-	Buy()
-}
-
-type Worker struct {
-	price int
-	earn int
-}
-
-type Factory struct {
-	price int
-	earn int
-}
-
-type Company struct {
-	price int
-	earn int
-}
-
-func (w Worker) Buy() {
-	fmt.Printf("buy a worker for %d\n", w.price)
-}
-
-func (f Factory) Buy() {
-	fmt.Println("buy a factory")
-}
-
-func (f Company) Buy() {
-	fmt.Println("buy a company")
-}
-
 func display() tea.View{
 
 	v := tea.NewView("Hello, World!")
 	return (v)
 }
 
-func newWorker () Worker{
-	return Worker{price : 10, earn : 1}
+type Object interface{
+	getPrice()	int
+	getEarn()   int
+	getAmount() int
+	Buy()
 }
 
-func newFactory () Factory{
-	return Factory{price : 100, earn : 10}
+type ObjStats struct {
+	price int
+	earn int
+	amount int
 }
 
-func newCompany () Company{
-	return Company{price : 500, earn : 50}
+func (b *ObjStats) Buy() {} //le truc cheloouuuuuu type func buy() = 0 en cPP
+
+func (obj *business) Buy (name string){
+	choice, check := obj.stock[name]
+	if !check {
+		fmt.Println("Item doesn't exist")
+	}
+	//choice.amount++
+	fmt.Println("item : ", name)
+	fmt.Println("amount : ", choice.getAmount())
+	fmt.Println("earn : ", choice.getEarn())
+	fmt.Println("price : ", choice.getPrice())
+	fmt.Println("BUYINGGGG")
+}
+
+func (obj *ObjStats) getEarn() int {return obj.earn}
+func (obj *ObjStats) getPrice() int {return obj.price}
+func (obj *ObjStats) getAmount() int {return obj.amount}
+
+type Worker struct {ObjStats}
+type Factory struct {ObjStats}
+type Company struct {ObjStats}
+
+type business struct {
+	stock map[string]Object
+	money int
 }
 
 type model struct {
 	cursor 	int
+	items	business
 	actions []string
-}
-
-func getStock(choice string) int {
-	switch choice {
-	case "Worker" :
-		return Stock.w
-	case "Factory" :
-		return Stock.f
-	case "Company" :
-		return Stock.c
-	}
-	return (0);
 }
 
 func (m model) View() tea.View {
@@ -103,7 +67,7 @@ func (m model) View() tea.View {
 		if m.cursor == i {
 			cursor = ">"
 		}
-		s += fmt.Sprintf("%s %s : %d\n", cursor, choice, getStock(choice))
+		s += fmt.Sprintf("%s %s : %d\n", cursor, choice, m.items.stock[choice].getAmount())
 	}
 	return (tea.NewView(s))
 }
@@ -127,15 +91,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 						m.cursor++
 					}
 				case "enter" :
-					switch m.cursor {
-						case 1 :
-							Stock.Add(newWorker())
-						case 2 :
-							Stock.Add(newFactory())
-						case 3 :
-							Stock.Add(newCompany())
-						}
-
+					m.items.Buy(m.actions[m.cursor])
 			}
 	}
 
@@ -144,7 +100,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 
 func makeModel() model {
 	return model {
-		actions : []string {"Click", "Worker", "Factory", "Company"},
+		actions: []string {"worker", "factory", "company"},
+		cursor : 0,
+		items : business{
+			money : 100,
+			stock : map[string]Object {
+				"worker": &Worker{ObjStats{price : 0, earn : 0, amount : 0}},
+				"factory": &Factory{ObjStats{price : 0, earn : 0, amount : 0}},
+				"company": &Company{ObjStats{price : 0, earn : 0, amount : 0}},
+			},
+		},
 	}
 }
 
