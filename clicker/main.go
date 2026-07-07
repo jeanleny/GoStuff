@@ -5,7 +5,25 @@ import (
 	"os"
 	items "clicker/internal/items"
 	tea "charm.land/bubbletea/v2"
+	lipgloss "charm.land/lipgloss/v2"
 )
+
+var money = lipgloss.NewStyle().
+    Bold(true).
+    Foreground(lipgloss.Color("#FFFFFF")).
+    Background(lipgloss.Color("#105a37")).
+    PaddingTop(0).
+   	PaddingLeft(0)
+	
+
+var menu = lipgloss.NewStyle().
+    Bold(true).
+    Foreground(lipgloss.Color("#FFFFFF")).
+    Background(lipgloss.Color("#00836d")).
+    PaddingTop(0).
+   	PaddingLeft(0)
+    //Width(22)
+
 
 func display() tea.View{
 
@@ -29,7 +47,11 @@ func (m model) View() tea.View {
 		}
 		s += fmt.Sprintf("%s %s : %d\n", cursor, choice, m.items.Stock[choice].GetAmount())
 	}
-	return (tea.NewView(s))
+	menuBlock := menu.Render(s)
+	moneyBlock := money.Render(fmt.Sprintf("$$$ : %d\n", m.items.Money))
+	moneyPlaced := lipgloss.Place(0, 0, lipgloss.Right, lipgloss.Top, moneyBlock)
+	full := lipgloss.JoinHorizontal(lipgloss.Top, menuBlock, moneyPlaced)
+	return (tea.NewView(menu.Render(full)))
 }
 
 func (m model) Init() tea.Cmd {
