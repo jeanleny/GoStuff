@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	items "clicker/internal/items"
 	tea "charm.land/bubbletea/v2"
 )
 
@@ -12,50 +13,9 @@ func display() tea.View{
 	return (v)
 }
 
-type Object interface{
-	getPrice()	int
-	getEarn()   int
-	getAmount() int
-	Buy()
-}
-
-type ObjStats struct {
-	price int
-	earn int
-	amount int
-}
-
-func (b *ObjStats) Buy() {} //le truc cheloouuuuuu type func buy() = 0 en cPP
-
-func (obj *business) Buy (name string){
-	choice, check := obj.stock[name]
-	if !check {
-		fmt.Println("Item doesn't exist")
-	}
-	//choice.amount++
-	fmt.Println("item : ", name)
-	fmt.Println("amount : ", choice.getAmount())
-	fmt.Println("earn : ", choice.getEarn())
-	fmt.Println("price : ", choice.getPrice())
-	fmt.Println("BUYINGGGG")
-}
-
-func (obj *ObjStats) getEarn() int {return obj.earn}
-func (obj *ObjStats) getPrice() int {return obj.price}
-func (obj *ObjStats) getAmount() int {return obj.amount}
-
-type Worker struct {ObjStats}
-type Factory struct {ObjStats}
-type Company struct {ObjStats}
-
-type business struct {
-	stock map[string]Object
-	money int
-}
-
 type model struct {
 	cursor 	int
-	items	business
+	items	items.Business
 	actions []string
 }
 
@@ -67,7 +27,7 @@ func (m model) View() tea.View {
 		if m.cursor == i {
 			cursor = ">"
 		}
-		s += fmt.Sprintf("%s %s : %d\n", cursor, choice, m.items.stock[choice].getAmount())
+		s += fmt.Sprintf("%s %s : %d\n", cursor, choice, m.items.Stock[choice].GetAmount())
 	}
 	return (tea.NewView(s))
 }
@@ -102,12 +62,12 @@ func makeModel() model {
 	return model {
 		actions: []string {"worker", "factory", "company"},
 		cursor : 0,
-		items : business{
-			money : 100,
-			stock : map[string]Object {
-				"worker": &Worker{ObjStats{price : 0, earn : 0, amount : 0}},
-				"factory": &Factory{ObjStats{price : 0, earn : 0, amount : 0}},
-				"company": &Company{ObjStats{price : 0, earn : 0, amount : 0}},
+		items : items.Business{
+			Money : 100,
+			Stock : map[string]items.Object {
+				"worker":   &items.Worker{items.ObjStats{Price : 0, Earn : 0, Amount : 0}},
+				"factory": &items.Factory{items.ObjStats{Price : 0, Earn : 0, Amount : 0}},
+				"company": &items.Company{items.ObjStats{Price : 0, Earn : 0, Amount : 0}},
 			},
 		},
 	}
