@@ -26,25 +26,27 @@ type model struct {
 }
 
 func (m model) View() tea.View {
-	s := "Kessafou ?\n"
+	s := []string {"Kessafou ?\n"}
 	err := ""
 	for i, choice := range m.actions {
 		cursor := " "
-		err = ""
 		if m.cursor == i {
 			cursor = ">"
-			err = m.ErrText
 		}
-		s += fmt.Sprintf("%s %s : %d %s\n", cursor, choice, m.items.Stock[choice].GetAmount(), err)
+		line := fmt.Sprintf("%s %s : %d %s\n", cursor, choice, m.items.Stock[choice].GetAmount(), err)
+		lineBlock := render.Menu.Render(line)
+		if m.cursor == i && m.ErrText != "" {
+			errBlock := render.ErrUi.Render(m.ErrText)
+			lineBlock = lipgloss.JoinHorizontal(lipgloss.Top, lineBlock, errBlock)
+		}
+		s = append(s, lineBlock)
 	}
-
-	errUiBlock := render.ErrUi.Render(err)
-	menuBlock := render.Menu.Render(s)
-	moneyBlock := render.Money.Render(fmt.Sprintf("$$$ : %d\n", m.items.Money))
-	moneyPlaced := lipgloss.Place(m.width - (lipgloss.Width(menuBlock) + lipgloss.Width(errUiBlock)),lipgloss.Height(menuBlock), lipgloss.Right, lipgloss.Top, moneyBlock)
-	full := lipgloss.JoinHorizontal(lipgloss.Top, menuBlock, errUiBlock, moneyPlaced)
-	return tea.NewView(full)
-}
+		menuBlock := lipgloss.JoinVertical(lipgloss.Left, s...)
+		moneyBlock := render.Money.Render(fmt.Sprintf("$$$ : %d\n", m.items.Money))
+		moneyPlaced := lipgloss.Place(m.width - lipgloss.Width(menuBlock) ,lipgloss.Height(menuBlock), lipgloss.Right, lipgloss.Top, moneyBlock)
+		full := lipgloss.JoinHorizontal(lipgloss.Top, menuBlock, moneyPlaced)
+		return tea.NewView(full)
+	}	
 
 func (m model) Init() tea.Cmd {
 	return nil
