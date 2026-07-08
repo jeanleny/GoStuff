@@ -1,9 +1,5 @@
 package items
 
-import (
-	"fmt"
-)
-
 type Object interface{
 	GetPrice()	int
 	GetEarn()   int
@@ -28,12 +24,15 @@ func (obj *ObjStats) GetAmount() int {return obj.Amount}
 
 func (b *ObjStats) Buy() {} //le truc cheloouuuuuu type func buy() = 0 en cPP
 
-func (obj *Business) Buy (name string){
-	choice, check := obj.Stock[name]
-	if !check {
-		fmt.Println("Item doesn't exist")
+func (obj *Business) Buy (name string) bool {
+	choice := obj.Stock[name]
+	price := obj.Stock[name].GetPrice()
+	if (obj.Money < price) {
+		return (false)
 	}
+	obj.Money -= price
 	choice.AddAmount(1);
+	return (true)
 }
 
 type Business struct {
