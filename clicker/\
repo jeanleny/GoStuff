@@ -26,7 +26,6 @@ type model struct {
 	ErrText			string
 	Working			bool
 	WorkingTimer	int
-	UpdateTimer		int
 }
 
 func (m model) View() tea.View {
@@ -46,7 +45,7 @@ func (m model) View() tea.View {
 		s = append(s, lineBlock)
 	}
 		menuBlock := lipgloss.JoinVertical(lipgloss.Left, s...)
-		moneyBlock := render.Money.Render(fmt.Sprintf("$$$ : %0.2f\n", m.items.Money))
+		moneyBlock := render.Money.Render(fmt.Sprintf("$$$ : %d\n", m.items.Money))
 		moneyPlaced := lipgloss.Place(m.width - lipgloss.Width(menuBlock) ,lipgloss.Height(menuBlock), lipgloss.Right, lipgloss.Top, moneyBlock)
 		full := lipgloss.JoinHorizontal(lipgloss.Top, menuBlock, moneyPlaced)
 		return tea.NewView(full)
@@ -92,24 +91,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 					if (!m.Working) {
 						m.items.Work()
 						m.Working = true 
-						return m ,tickCmd()
+						tickCmd()
 					}
 			}
 		case TickMsg :
 			m.WorkingTimer --
-			m.UpdateTimer --
-			if m.UpdateTimer <= 0 {
-				m.UpdateTimer = 1
-				m.items.Money += m.items.Earning
-				return m, tickCmd()
-			}
 			if m.WorkingTimer <= 0 {
+				fmt.Println("timer done")
 				m.Working = false
-				m.WorkingTimer = 1
 			} else {
 				return m, tickCmd()
 			}
-			break
 	}
 	return m, nil
 }
