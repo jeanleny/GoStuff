@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"net/http"
 	items "clicker/internal/items"
 	tea "charm.land/bubbletea/v2"
 	render "clicker/internal/render"
 	lipgloss "charm.land/lipgloss/v2"
 )
 
+const url = "http://localhost:8080/"
 
 func display() tea.View{
 
@@ -27,11 +29,40 @@ type model struct {
 	Working			bool
 	WorkingTimer	int
 	UpdateTimer		int
+	err				error
+	status			int
+}
+
+// For messages that contain errors it's often handy to also implement the
+// error interface on the message.
+func (e errMsg) Error() string { return e.err.Error() }
+
+type errMsg struct{ err error }
+
+type statusMsg int
+
+func checkServer() tea.Msg {
+    // Create an HTTP client and make a GET request.
+    c := &http.Client{Timeout: 10 * time.Second}
+    res, err := c.Get(url)
+
+    if err != nil {
+        // There was an error making our request. Wrap the error we received
+        // in a message and return it.
+        return errMsg{err}
+    }
+    // We received a response from the server. Return the HTTP status code
+    // as a message.
+    return statusMsg(res.StatusCode)
 }
 
 func (m model) View() tea.View {
 	s := []string {"Kessafou ?"}
 	err := ""
+//	if m.status > 0 {
+//        sR := fmt.Sprintf("%d %s!", m.status, http.StatusText(m.status))
+//		return (tea.NewView(sR))
+//    }
 	for i, choice := range m.actions {
 		cursor := " "
 		if m.cursor == i {
@@ -53,7 +84,7 @@ func (m model) View() tea.View {
 	}	
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tea.Batch(checkServer, tickCmd())
 }
 
 func setWindowSize(h, w int, m *model) {
@@ -70,6 +101,19 @@ type TickMsg time.Time
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 	m.ErrText = ""
 	switch msg:= msg.(type){
+	case statusMsg :
+		// The server returned a status message. Save it to our model. Also
+        // tell the Bubble Tea runtime we want to exit because we have nothing
+        // else to do. We'll still be able to render a final view with our
+        // status message.
+        m.status = int(msg)
+		fmt.Println("pas du tou")
+        return m, nil
+	case errMsg :
+		// There was an error. Note it in the model. And tell the runtime
+        // we're done and want to quit.
+        m.err = msg
+        return m, nil
 	case tea.WindowSizeMsg :
 		setWindowSize(msg.Height, msg.Width, &m)
 		case tea.KeyPressMsg :
@@ -133,7 +177,6 @@ func makeModel() model {
 func main ()  {
 	m:= makeModel()
 	p := tea.NewProgram(m)
-	p.Run()
 	if _, err := p.Run(); err != nil {
         fmt.Printf("Alas, there's been an error: %v", err)
         os.Exit(1)
