@@ -14,7 +14,6 @@ import (
 const url = "http://localhost:8080/"
 
 func display() tea.View{
-
 	v := tea.NewView("Hello, World!")
 	return (v)
 }
@@ -59,10 +58,6 @@ func checkServer() tea.Msg {
 func (m model) View() tea.View {
 	s := []string {"Kessafou ?"}
 	err := ""
-//	if m.status > 0 {
-//        sR := fmt.Sprintf("%d %s!", m.status, http.StatusText(m.status))
-//		return (tea.NewView(sR))
-//    }
 	for i, choice := range m.actions {
 		cursor := " "
 		if m.cursor == i {
@@ -129,6 +124,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 						m.cursor++
 					}
 				case "enter" :
+					checkServer()
 					if (!m.items.Buy(m.actions[m.cursor])){
 						m.ErrText = "Can't afford"
 					} 
