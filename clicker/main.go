@@ -19,6 +19,7 @@ func display() tea.View{
 }
 
 type model struct {
+	name 			string
 	cursor			int
 	items			items.Business
 	width			int
@@ -157,6 +158,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 
 func makeModel() model {
 	return model {
+		name : "le caca prousti",
 		actions: []string {"worker", "factory", "company"},
 		cursor : 0,
 		items : items.Business{
