@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	render "clicker/internal/render"
 	lipgloss "charm.land/lipgloss/v2"
+	auth "clicker/internal/auth"
 )
 
 const url = "http://localhost:8080/"
@@ -20,6 +21,7 @@ func display() tea.View{
 
 type model struct {
 	name 			string
+	auth			auth.Auth
 	cursor			int
 	items			items.Business
 	width			int
@@ -103,7 +105,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
         // else to do. We'll still be able to render a final view with our
         // status message.
         m.status = int(msg)
-		fmt.Println("pas du tou")
         return m, nil
 	case errMsg :
 		// There was an error. Note it in the model. And tell the runtime
@@ -159,6 +160,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 func makeModel() model {
 	return model {
 		name : "le caca prousti",
+		auth : auth.Auth{
+			ServerUrl : "http://localhost:8080",
+		},
 		actions: []string {"worker", "factory", "company"},
 		cursor : 0,
 		items : items.Business{
@@ -172,8 +176,19 @@ func makeModel() model {
 	}
 }
 
+func authentication(m model) error {
+	var login string
+	fmt.Print("login : ")
+	fmt.Scan(&login)
+	err := auth.Register(login, m.auth.ServerUrl)
+	return err
+}
+
 func main ()  {
 	m:= makeModel()
+	if (authentication(m) != nil) {
+		return 
+	}
 	p := tea.NewProgram(m)
 	if _, err := p.Run(); err != nil {
         fmt.Printf("Alas, there's been an error: %v", err)

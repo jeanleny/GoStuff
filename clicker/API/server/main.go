@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"fmt"
 	"log"
+	"io"
 )
 
 type s_dataBase struct {
@@ -36,26 +37,28 @@ func (dataBase *s_dataBase) getUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (dataBase *s_dataBase)createUsers(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("posted")
-	id := 000
-	login := "michel"
+	res, err := io.ReadAll(r.Body)
+	fmt.Printf("request : %s\n",res)
+	id := 0
+	login := res
 	money := 346
-	_, err := dataBase.db.Exec("INSERT INTO player(id, login, money) VALUES($1, $2, $3)", id, login, money)
+	_, err = dataBase.db.Exec("INSERT INTO player(id, login, money) VALUES($1, $2, $3)", id, login, money)
 	if (err != nil) {
+		fmt.Println(err)
 		fmt.Println("db insert failed")
 	} else {
 		fmt.Println("bomb has been posted")
 	}
 }
 
-func createDataBase() (*s_dataBase, error){
+func connectDataBase() (*s_dataBase, error){
 	db, err := sql.Open("pgx", "postgres://user:pass@localhost:5432/clicker?sslmode=disable") 
 	database := &s_dataBase{db : db}
 	return database, err
 }
 
 func main () {
-	dataBase, err := createDataBase()
+	dataBase, err := connectDataBase()
 	if err != nil {
 		fmt.Println("failed to create database")
 	}
