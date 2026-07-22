@@ -3,17 +3,25 @@ services:
     image: postgres:17
     container_name: clicker-db
     restart: unless-stopped
-
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: clicker
+    
+    env_file:
+      - ../.env
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 4s
+      timeout: 3s
+      retries: 3
 
     ports:
       - "5432:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  api:
+   build: ./server
+   container_name: api
+   restart: unless-stopped
 
 volumes : 
   postgres_data:
