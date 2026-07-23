@@ -52,7 +52,7 @@ func (dataBase *s_dataBase)createUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func connectDataBase() (*s_dataBase, error){
-	db, err := sql.Open("pgx", "postgres://user:pass@localhost:5432/clicker?sslmode=disable") 
+	db, err := sql.Open("pgx", "postgres://user:pass@db:5432/clicker?sslmode=disable") 
 	database := &s_dataBase{db : db}
 	return database, err
 }

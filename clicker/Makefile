@@ -1,5 +1,5 @@
 all :
-	docker compose -f ./API/docker-compose.yml up -d --build
+	docker compose -f ./API/docker-compose.yml up --build
 
 
 down :
