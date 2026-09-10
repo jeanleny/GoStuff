@@ -1,5 +1,5 @@
 all :
-	docker compose -f ./API/docker-compose.yml up --build
+	docker compose -f ./API/docker-compose.yml up --build --detach
 
 
 down :
