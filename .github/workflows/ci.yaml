@@ -20,5 +20,5 @@ jobs:
           go-version-file: clicker/go.mod
 
       - name: Build Clicker
-        run: make
+        run: clicker/make
 
