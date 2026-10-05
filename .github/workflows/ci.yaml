@@ -21,4 +21,3 @@ jobs:
 
       - name: Build Clicker
         run: cd clicker && make
-
